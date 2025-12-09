@@ -9,11 +9,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- React -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script crossorigin defer src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin defer src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
     <!-- Babel -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script defer src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
@@ -34,7 +34,7 @@
         ::-webkit-scrollbar-track { background: var(--bg-dark); }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
-        body { background-color: var(--bg-dark); color: #cbd5e1; font-family: 'Inter', sans-serif; overflow: hidden; user-select: none; }
+        body { background-color: var(--bg-dark); color: #cbd5e1; font-family: 'Inter', sans-serif; overflow: hidden; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
         .cursor-pan { cursor: grab; }
         .cursor-pan:active { cursor: grabbing; }
