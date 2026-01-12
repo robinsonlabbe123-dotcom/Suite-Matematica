@@ -27,32 +27,65 @@ export async function POST(request: Request) {
   }
 
   const { org_id, channel, from, message, meta } = body;
-  const contactUpsert = await supabase
-    .from("contacts")
-    .upsert(
-      {
-        org_id,
-        name: from.name || from.phone || from.email || "Lead",
-        email: from.email || null,
-        phone: from.phone || null,
-        status: "New",
-      },
-      { onConflict: "org_id,email" },
-    )
-    .select()
-    .single();
+  const contactPayload = {
+    org_id,
+    name: from.name || from.phone || from.email || "Lead",
+    email: from.email || null,
+    phone: from.phone || null,
+    status: "New",
+  };
 
-  if (contactUpsert.error || !contactUpsert.data) {
-    return NextResponse.json({ error: contactUpsert.error?.message }, { status: 500 });
+  let contact =
+    from.phone
+      ? (
+          await supabase
+            .from("contacts")
+            .select("*")
+            .eq("org_id", org_id)
+            .eq("phone", from.phone)
+            .maybeSingle()
+        ).data
+      : null;
+
+  if (!contact && from.email) {
+    contact =
+      (
+        await supabase
+          .from("contacts")
+          .select("*")
+          .eq("org_id", org_id)
+          .eq("email", from.email)
+          .maybeSingle()
+      ).data || null;
   }
 
-  const contact = contactUpsert.data;
+  const contactResponse = contact
+    ? await supabase
+        .from("contacts")
+        .update({ ...contactPayload })
+        .eq("id", contact.id)
+        .select()
+        .single()
+    : await supabase.from("contacts").insert(contactPayload).select().single();
 
-  const existingThread = await supabase
+  if (contactResponse.error || !contactResponse.data) {
+    return NextResponse.json({ error: contactResponse.error?.message }, { status: 500 });
+  }
+
+  contact = contactResponse.data;
+
+  let threadQuery = supabase
     .from("conversation_threads")
     .select("*")
-    .eq("org_id", org_id)
-    .maybeSingle();
+    .eq("org_id", org_id);
+
+  if (meta?.external_thread_id) {
+    threadQuery = threadQuery.eq("external_id", meta.external_thread_id);
+  } else {
+    threadQuery = threadQuery.eq("contact_id", contact.id);
+  }
+
+  const existingThread = await threadQuery.maybeSingle();
 
   const thread =
     existingThread.data ||
